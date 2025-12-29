@@ -1,0 +1,30 @@
+const mongoose = require("mongoose");
+
+const XUserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String, // ❗ MUST be String, not string
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    X_ID: {
+      type: String, // ❗ MUST be String, not string
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    name: {
+      type: String, // ❗ MUST be String, not string
+      required: true,
+      index: true,
+    },
+  },
+  { versionKey: false, timestamps: true }
+);
+
+module.exports = mongoose.model("XUser", XUserSchema);
+
+// Mongoose model for caching X user data
