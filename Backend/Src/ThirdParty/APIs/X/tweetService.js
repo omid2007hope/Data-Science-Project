@@ -1,68 +1,114 @@
 const X_API = require("./X_API");
 const XTweet = require("../../../Data/Model/X_TweetCache");
 
+function normalizePublicMetrics(metrics) {
+  return {
+    retweet_count: metrics?.retweet_count ?? 0,
+    reply_count: metrics?.reply_count ?? 0,
+    like_count: metrics?.like_count ?? 0,
+    quote_count: metrics?.quote_count ?? 0,
+    bookmark_count: metrics?.bookmark_count ?? 0,
+    impression_count: metrics?.impression_count ?? 0,
+  };
+}
+
+function mapTweetForCache(tweet, userId) {
+  return {
+    id: tweet.id,
+    text: tweet.text,
+    created_at: tweet.created_at ? new Date(tweet.created_at) : null,
+    lang: tweet.lang,
+    edit_history_tweet_ids: tweet.edit_history_tweet_ids || [],
+    context_annotations: tweet.context_annotations || [],
+    public_metrics: normalizePublicMetrics(tweet.public_metrics),
+    author_id: userId,
+  };
+}
+
+function mapTweetForResponse(tweet) {
+  return {
+    id: tweet.id,
+    text: tweet.text,
+    created_at: tweet.created_at,
+    lang: tweet.lang,
+    edit_history_tweet_ids: tweet.edit_history_tweet_ids || [],
+    context_annotations: tweet.context_annotations || [],
+    public_metrics: normalizePublicMetrics(tweet.public_metrics),
+  };
+}
+
+function buildMetaFromTweets(tweets) {
+  if (!tweets || tweets.length === 0) {
+    return {
+      result_count: 0,
+      newest_id: null,
+      oldest_id: null,
+      next_token: null,
+    };
+  }
+
+  return {
+    result_count: tweets.length,
+    newest_id: tweets[0].id,
+    oldest_id: tweets[tweets.length - 1].id,
+    next_token: null,
+  };
+}
+
 async function getUserTweets(userId) {
   if (!userId) {
     throw new Error("userId is required");
   }
 
-  // 1️⃣ CHECK CACHE (latest tweet for this user)
-  const cached = await XTweet.findOne({ author_id: userId })
+  // 1) CHECK CACHE (latest tweets for this user)
+  const cached = await XTweet.find({ author_id: userId })
     .sort({ created_at: -1 })
+    .limit(10)
     .lean();
 
-  if (cached) {
+  if (cached && cached.length) {
     return {
-      source: "cache",
-      data: cached,
+      data: cached.map((tweet) => mapTweetForResponse(tweet)),
+      meta: buildMetaFromTweets(cached),
     };
   }
 
   try {
-    // 2️⃣ FETCH FROM X API (OFFICIAL ENDPOINT)
+    // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
     const response = await X_API.get(`/users/${userId}/tweets`, {
       params: {
         max_results: 10,
-        exclude: "retweets,replies",
-        "tweet.fields": "created_at,public_metrics,lang",
+        "tweet.fields":
+          "created_at,public_metrics,lang,context_annotations,edit_history_tweet_ids",
+        expansions: "attachments.media_keys",
+        "media.fields": "url,preview_image_url,type",
       },
     });
 
-    // 3️⃣ EXTRACT TWEET (X API ALWAYS RETURNS AN ARRAY)
-    const tweet = response?.data?.data?.[0];
+    const apiTweets = response?.data?.data || [];
+    const apiMeta = response?.data?.meta || null;
 
-    if (!tweet) {
+    if (!apiTweets.length) {
       return {
-        source: "x_api",
-        data: null, // user has no tweets
+        data: [],
+        meta: apiMeta || buildMetaFromTweets([]),
       };
     }
 
-    // 4️⃣ MAP EXACTLY TO XTweet SCHEMA (DOC-ALIGNED)
-    const objectStructure = {
-      id: tweet.id,
-      text: tweet.text,
-      created_at: new Date(tweet.created_at),
-      lang: tweet.lang,
-      public_metrics: {
-        like_count: tweet.public_metrics.like_count,
-        retweet_count: tweet.public_metrics.retweet_count,
-        reply_count: tweet.public_metrics.reply_count,
-        quote_count: tweet.public_metrics.quote_count,
+    const cacheWrites = apiTweets.map((tweet) => ({
+      updateOne: {
+        filter: { id: tweet.id },
+        update: { $set: mapTweetForCache(tweet, userId) },
+        upsert: true,
       },
-      author_id: userId,
-    };
+    }));
 
-    // 5️⃣ UPSERT (SAFE FOR CACHING)
-    const savedTweet = await XTweet.findOneAndUpdate(
-      { id: tweet.id },
-      { $set: objectStructure },
-      { upsert: true, new: true }
-    ).lean();
+    // 3) UPSERT (SAFE FOR CACHING)
+    await XTweet.bulkWrite(cacheWrites, { ordered: false });
 
     return {
-      source: "x_api",
-      data: savedTweet,
+      data: apiTweets.map((tweet) => mapTweetForResponse(tweet)),
+      meta: apiMeta || buildMetaFromTweets(apiTweets),
     };
   } catch (err) {
     const status = err.response?.status;
