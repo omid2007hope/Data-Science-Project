@@ -77,7 +77,8 @@ async function getUserTweets(userId) {
     // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
     const response = await X_API.get(`/users/${userId}/tweets`, {
       params: {
-        max_results: 10,
+        max_results: 5,
+        exclude: "replies,retweets",
         "tweet.fields":
           "created_at,public_metrics,lang,context_annotations,edit_history_tweet_ids",
         expansions: "attachments.media_keys",
