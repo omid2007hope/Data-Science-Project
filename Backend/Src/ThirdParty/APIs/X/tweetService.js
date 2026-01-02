@@ -18,10 +18,16 @@ function mapTweetForCache(tweet, userId) {
     text: tweet.text,
     created_at: tweet.created_at ? new Date(tweet.created_at) : null,
     lang: tweet.lang,
-    edit_history_tweet_ids: tweet.edit_history_tweet_ids || [],
-    context_annotations: tweet.context_annotations || [],
+    source: tweet.source,
+    display_text_range: tweet.display_text_range || null,
+    attachments: tweet.attachments
+      ? {
+          media_keys: tweet.attachments.media_keys || [],
+          poll_ids: tweet.attachments.poll_ids || [],
+        }
+      : null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
-    author_id: userId,
+    userId,
   };
 }
 
@@ -31,8 +37,9 @@ function mapTweetForResponse(tweet) {
     text: tweet.text,
     created_at: tweet.created_at,
     lang: tweet.lang,
-    edit_history_tweet_ids: tweet.edit_history_tweet_ids || [],
-    context_annotations: tweet.context_annotations || [],
+    source: tweet.source,
+    display_text_range: tweet.display_text_range || null,
+    attachments: tweet.attachments || null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
   };
 }
@@ -55,32 +62,34 @@ function buildMetaFromTweets(tweets) {
   };
 }
 
-async function getUserTweets(userId) {
-  if (!userId) {
-    throw new Error("userId is required");
+async function getUserTweets({ xUserId, userId }) {
+  if (!xUserId) {
+    throw new Error("xUserId is required");
   }
 
   // 1) CHECK CACHE (latest tweets for this user)
-  const cached = await XTweet.find({ author_id: userId })
-    .sort({ created_at: -1 })
-    .limit(10)
-    .lean();
+  if (userId) {
+    const cached = await XTweet.find({ userId })
+      .sort({ created_at: -1 })
+      .limit(10)
+      .lean();
 
-  if (cached && cached.length) {
-    return {
-      data: cached.map((tweet) => mapTweetForResponse(tweet)),
-      meta: buildMetaFromTweets(cached),
-    };
+    if (cached && cached.length) {
+      return {
+        data: cached.map((tweet) => mapTweetForResponse(tweet)),
+        meta: buildMetaFromTweets(cached),
+      };
+    }
   }
 
   try {
     // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
-    const response = await X_API.get(`/users/${userId}/tweets`, {
+    const response = await X_API.get(`/users/${xUserId}/tweets`, {
       params: {
         max_results: 5,
         exclude: "replies,retweets",
         "tweet.fields":
-          "created_at,public_metrics,lang,context_annotations,edit_history_tweet_ids",
+          "created_at,public_metrics,lang,source,display_text_range,attachments",
         expansions: "attachments.media_keys",
         "media.fields": "url,preview_image_url,type",
       },

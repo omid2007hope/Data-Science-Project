@@ -1,30 +1,8 @@
 const mongoose = require("mongoose");
 
-const ContextDomainSchema = new mongoose.Schema(
-  {
-    id: String,
-    name: String,
-    description: String,
-  },
-  { _id: false }
-);
-
-const ContextEntitySchema = new mongoose.Schema(
-  {
-    id: String,
-    name: String,
-    description: String,
-  },
-  { _id: false }
-);
-
-const ContextAnnotationSchema = new mongoose.Schema(
-  {
-    domain: ContextDomainSchema,
-    entity: ContextEntitySchema,
-  },
-  { _id: false }
-);
+// ======================
+// SUB-SCHEMAS
+// ======================
 
 const PublicMetricsSchema = new mongoose.Schema(
   {
@@ -38,26 +16,70 @@ const PublicMetricsSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Attachments can include media_keys and/or poll_ids (X API)
+const AttachmentsSchema = new mongoose.Schema(
+  {
+    media_keys: [String],
+    poll_ids: [String],
+  },
+  { _id: false }
+);
+
+// ======================
+// MAIN SCHEMA
+// ======================
+
 const XTweetSchema = new mongoose.Schema(
   {
+    // Tweet ID
     id: {
       type: String,
       required: true,
       unique: true,
       index: true,
     },
-    text: String,
-    created_at: Date,
-    lang: String,
-    edit_history_tweet_ids: [String],
-    context_annotations: [ContextAnnotationSchema],
-    public_metrics: PublicMetricsSchema,
-    author_id: {
+
+    // Tweet text
+    text: {
       type: String,
+      required: true,
+    },
+
+    // Creation time
+    created_at: {
+      type: Date,
+      index: true,
+    },
+
+    // Language
+    lang: String,
+
+    // Source (e.g. "Twitter Web App")
+    source: String,
+
+    // Display text range [start, end]
+    display_text_range: {
+      type: [Number],
+      validate: (v) => v.length === 2,
+    },
+
+    // Attachments (media / polls)
+    attachments: AttachmentsSchema,
+
+    // Public metrics
+    public_metrics: PublicMetricsSchema,
+
+    // Author reference
+    userId: {
+      type: mongoose.Schema.ObjectId,
+      ref: "XUser",
       index: true,
     },
   },
-  { versionKey: false, timestamps: true }
+  {
+    versionKey: false,
+    timestamps: true, // createdAt / updatedAt (DB-level)
+  }
 );
 
 module.exports = mongoose.model("XTweet", XTweetSchema);
