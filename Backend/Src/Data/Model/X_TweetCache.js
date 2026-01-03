@@ -16,15 +16,6 @@ const PublicMetricsSchema = new mongoose.Schema(
   { _id: false }
 );
 
-// Attachments can include media_keys and/or poll_ids (X API)
-const AttachmentsSchema = new mongoose.Schema(
-  {
-    media_keys: [String],
-    poll_ids: [String],
-  },
-  { _id: false }
-);
-
 // ======================
 // MAIN SCHEMA
 // ======================
@@ -32,7 +23,7 @@ const AttachmentsSchema = new mongoose.Schema(
 const XTweetSchema = new mongoose.Schema(
   {
     // Tweet ID
-    id: {
+    X_TweetID: {
       type: String,
       required: true,
       unique: true,
@@ -54,23 +45,17 @@ const XTweetSchema = new mongoose.Schema(
     // Language
     lang: String,
 
-    // Source (e.g. "Twitter Web App")
-    source: String,
-
     // Display text range [start, end]
     display_text_range: {
       type: [Number],
-      validate: (v) => v.length === 2,
+      validate: (v) => !v || v.length === 2,
     },
-
-    // Attachments (media / polls)
-    attachments: AttachmentsSchema,
 
     // Public metrics
     public_metrics: PublicMetricsSchema,
 
     // Author reference
-    userId: {
+    X_userID: {
       type: mongoose.Schema.ObjectId,
       ref: "XUser",
       index: true,

@@ -14,32 +14,23 @@ function normalizePublicMetrics(metrics) {
 
 function mapTweetForCache(tweet, userId) {
   return {
-    id: tweet.id,
+    X_TweetID: tweet.id,
     text: tweet.text,
     created_at: tweet.created_at ? new Date(tweet.created_at) : null,
     lang: tweet.lang,
-    source: tweet.source,
     display_text_range: tweet.display_text_range || null,
-    attachments: tweet.attachments
-      ? {
-          media_keys: tweet.attachments.media_keys || [],
-          poll_ids: tweet.attachments.poll_ids || [],
-        }
-      : null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
-    userId,
+    X_userID: userId || null,
   };
 }
 
 function mapTweetForResponse(tweet) {
   return {
-    id: tweet.id,
+    id: tweet.X_TweetID || tweet.id,
     text: tweet.text,
     created_at: tweet.created_at,
     lang: tweet.lang,
-    source: tweet.source,
     display_text_range: tweet.display_text_range || null,
-    attachments: tweet.attachments || null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
   };
 }
@@ -56,8 +47,9 @@ function buildMetaFromTweets(tweets) {
 
   return {
     result_count: tweets.length,
-    newest_id: tweets[0].id,
-    oldest_id: tweets[tweets.length - 1].id,
+    newest_id: tweets[0].X_TweetID || tweets[0].id,
+    oldest_id:
+      tweets[tweets.length - 1].X_TweetID || tweets[tweets.length - 1].id,
     next_token: null,
   };
 }
@@ -69,7 +61,7 @@ async function getUserTweets({ xUserId, userId }) {
 
   // 1) CHECK CACHE (latest tweets for this user)
   if (userId) {
-    const cached = await XTweet.find({ userId })
+    const cached = await XTweet.find({ X_userID: userId })
       .sort({ created_at: -1 })
       .limit(10)
       .lean();
@@ -88,10 +80,7 @@ async function getUserTweets({ xUserId, userId }) {
       params: {
         max_results: 5,
         exclude: "replies,retweets",
-        "tweet.fields":
-          "created_at,public_metrics,lang,source,display_text_range,attachments",
-        expansions: "attachments.media_keys",
-        "media.fields": "url,preview_image_url,type",
+        "tweet.fields": "created_at,public_metrics,lang,display_text_range",
       },
     });
 
@@ -107,7 +96,7 @@ async function getUserTweets({ xUserId, userId }) {
 
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {
-        filter: { id: tweet.id },
+        filter: { X_TweetID: tweet.id },
         update: { $set: mapTweetForCache(tweet, userId) },
         upsert: true,
       },
