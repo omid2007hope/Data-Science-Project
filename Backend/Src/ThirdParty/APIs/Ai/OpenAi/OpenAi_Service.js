@@ -1,5 +1,6 @@
 const openAi_API = require("./OpenAi_API");
 const OpenAiTweetAnalysis = require("../../../../Data/Model/OpenAi_TweetAnalysis");
+const XTweet = require("../../../../Data/Model/X_TweetCache");
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
@@ -119,6 +120,79 @@ async function analyzeTweetText({
   };
 }
 
+async function analyzeTweetsFromDb({
+  userId,
+  limit = 5,
+  model = DEFAULT_MODEL,
+  force = false,
+}) {
+  const query = {};
+  if (userId) {
+    query.X_userID = userId;
+  }
+
+  const tweets = await XTweet.find(query)
+    .sort({ created_at: -1 })
+    .limit(Math.max(Number(limit) || 5, 1))
+    .lean();
+
+  if (!tweets.length) {
+    return {
+      requested: 0,
+      analyzed: 0,
+      skipped: 0,
+      results: [],
+    };
+  }
+
+  let existingById = new Set();
+  if (!force) {
+    const ids = tweets.map((t) => t.X_TweetID).filter(Boolean);
+    const existing = await OpenAiTweetAnalysis.find({
+      X_TweetID: { $in: ids },
+      model,
+    })
+      .select({ X_TweetID: 1 })
+      .lean();
+    existingById = new Set(existing.map((e) => e.X_TweetID));
+  }
+
+  const results = [];
+  let analyzed = 0;
+  let skipped = 0;
+
+  for (const tweet of tweets) {
+    if (!tweet?.text) {
+      skipped += 1;
+      continue;
+    }
+
+    if (!force && tweet.X_TweetID && existingById.has(tweet.X_TweetID)) {
+      skipped += 1;
+      continue;
+    }
+
+    const result = await analyzeTweetText({
+      text: tweet.text,
+      tweetId: tweet.X_TweetID,
+      userId: tweet.X_userID,
+      model,
+      force,
+    });
+
+    results.push(result.data);
+    analyzed += 1;
+  }
+
+  return {
+    requested: tweets.length,
+    analyzed,
+    skipped,
+    results,
+  };
+}
+
 module.exports = {
   analyzeTweetText,
+  analyzeTweetsFromDb,
 };

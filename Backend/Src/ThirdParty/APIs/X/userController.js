@@ -3,6 +3,7 @@ const getUserTweets = require("./tweetService");
 
 async function X_getIdByUserName(req, res) {
   const { username } = req.params;
+  const { limit, force } = req.query || {};
 
   if (!username) {
     return res.status(400).json({ message: "Username parameter is required" });
@@ -28,12 +29,15 @@ async function X_getIdByUserName(req, res) {
     const theId = await getUserTweets({
       xUserId: userResult?.data?.X_ID,
       userId: userResult?.data?._id,
+      limit,
+      force: force === "true",
     });
 
     return res.status(200).json(theId);
   } catch (error) {
     return res.status(error.status || 500).json({
       message: error.message || "Internal server error",
+      details: error.details || null,
     });
   }
 }

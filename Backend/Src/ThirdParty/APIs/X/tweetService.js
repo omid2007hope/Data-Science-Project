@@ -54,22 +54,26 @@ function buildMetaFromTweets(tweets) {
   };
 }
 
-async function getUserTweets({ xUserId, userId }) {
+async function getUserTweets({ xUserId, userId, limit = 5, force = false }) {
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
 
+  const safeLimit = Math.min(Math.max(Number(limit) || 5, 1), 100);
+  let cached = [];
+
   // 1) CHECK CACHE (latest tweets for this user)
-  if (userId) {
-    const cached = await XTweet.find({ X_userID: userId })
+  if (userId && !force) {
+    cached = await XTweet.find({ X_userID: userId })
       .sort({ created_at: -1 })
-      .limit(10)
+      .limit(safeLimit)
       .lean();
 
     if (cached && cached.length) {
       return {
         data: cached.map((tweet) => mapTweetForResponse(tweet)),
         meta: buildMetaFromTweets(cached),
+        source: "cache",
       };
     }
   }
@@ -78,7 +82,7 @@ async function getUserTweets({ xUserId, userId }) {
     // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
     const response = await X_API.get(`/users/${xUserId}/tweets`, {
       params: {
-        max_results: 5,
+        max_results: safeLimit,
         exclude: "replies,retweets",
         "tweet.fields": "created_at,public_metrics,lang,display_text_range",
       },
@@ -108,9 +112,18 @@ async function getUserTweets({ xUserId, userId }) {
     return {
       data: apiTweets.map((tweet) => mapTweetForResponse(tweet)),
       meta: apiMeta || buildMetaFromTweets(apiTweets),
+      source: "x_api",
     };
   } catch (err) {
     const status = err.response?.status;
+
+    if (cached.length) {
+      return {
+        data: cached.map((tweet) => mapTweetForResponse(tweet)),
+        meta: buildMetaFromTweets(cached),
+        source: "cache_fallback",
+      };
+    }
 
     if (status === 429) {
       const reset = err.response?.headers["x-rate-limit-reset"];
