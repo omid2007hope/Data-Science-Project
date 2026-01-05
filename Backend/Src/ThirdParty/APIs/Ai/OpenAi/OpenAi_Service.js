@@ -20,6 +20,8 @@ Rules:
 `.trim();
 
 function buildPayload({ text, model = DEFAULT_MODEL }) {
+  // console.log(text);
+
   return {
     model,
     input: [
@@ -33,6 +35,15 @@ function buildPayload({ text, model = DEFAULT_MODEL }) {
       },
     ],
   };
+}
+
+async function sendDataToAi(text) {
+  const payload = buildPayload({
+    text: text,
+  });
+  const { data } = await openAi_API.post("/responses", payload);
+
+  return data;
 }
 
 function extractOpenAiText(data) {
@@ -195,4 +206,6 @@ async function analyzeTweetsFromDb({
 module.exports = {
   analyzeTweetText,
   analyzeTweetsFromDb,
+  buildPayload,
+  sendDataToAi,
 };

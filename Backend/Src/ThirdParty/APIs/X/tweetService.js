@@ -1,6 +1,8 @@
 const X_API = require("./X_API");
 const XTweet = require("../../../Data/Model/X_TweetCache");
 
+// Just normalizing and mapping the tweet data
+
 function normalizePublicMetrics(metrics) {
   return {
     retweet_count: metrics?.retweet_count ?? 0,
@@ -12,7 +14,7 @@ function normalizePublicMetrics(metrics) {
   };
 }
 
-function mapTweetForCache(tweet, userId) {
+function mapTweetForCache(tweet, xUserId) {
   return {
     X_TweetID: tweet.id,
     text: tweet.text,
@@ -20,7 +22,7 @@ function mapTweetForCache(tweet, userId) {
     lang: tweet.lang,
     display_text_range: tweet.display_text_range || null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
-    X_userID: userId || null,
+    X_userID: xUserId || null,
   };
 }
 
@@ -45,6 +47,8 @@ function buildMetaFromTweets(tweets) {
     };
   }
 
+  // returning the results
+
   return {
     result_count: tweets.length,
     newest_id: tweets[0].X_TweetID || tweets[0].id,
@@ -54,7 +58,9 @@ function buildMetaFromTweets(tweets) {
   };
 }
 
-async function getUserTweets({ xUserId, userId, limit = 5, force = false }) {
+// real stuff down here
+
+async function getUserTweets({ xUserId, limit = 5 }) {
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
@@ -63,8 +69,9 @@ async function getUserTweets({ xUserId, userId, limit = 5, force = false }) {
   let cached = [];
 
   // 1) CHECK CACHE (latest tweets for this user)
-  if (userId && !force) {
-    cached = await XTweet.find({ X_userID: userId })
+  // here
+  if (xUserId) {
+    cached = await XTweet.find({ X_userID: xUserId })
       .sort({ created_at: -1 })
       .limit(safeLimit)
       .lean();
@@ -101,7 +108,8 @@ async function getUserTweets({ xUserId, userId, limit = 5, force = false }) {
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {
         filter: { X_TweetID: tweet.id },
-        update: { $set: mapTweetForCache(tweet, userId) },
+        // here
+        update: { $set: mapTweetForCache(tweet, xUserId) },
         upsert: true,
       },
     }));
