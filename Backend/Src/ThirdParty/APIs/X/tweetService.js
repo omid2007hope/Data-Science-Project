@@ -61,7 +61,9 @@ function buildMetaFromTweets(tweets) {
 //! real stuff down here
 //! need to get fucking fixed
 
-async function getUserTweets({ xUserId, limit = 5 }) {
+const ONE_DAY_MS = 900_000;
+
+async function getUserTweets({ xUserId, limit = 5, timeLimit = ONE_DAY_MS }) {
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
@@ -76,7 +78,17 @@ async function getUserTweets({ xUserId, limit = 5 }) {
       .limit(limit)
       .lean();
 
-    if (cached && cached.length) {
+    const newestCacheAt =
+      cached?.[0]?.updatedAt || cached?.[0]?.createdAt || null;
+    const cacheAgeMs = newestCacheAt
+      ? Date.now() - new Date(newestCacheAt).getTime()
+      : null;
+    const isCacheFresh =
+      typeof cacheAgeMs === "number" &&
+      cacheAgeMs >= 0 &&
+      cacheAgeMs < timeLimit;
+
+    if (cached && cached.length && isCacheFresh) {
       return {
         data: cached.map((tweet) => mapTweetForResponse(tweet)),
         meta: buildMetaFromTweets(cached),
@@ -104,6 +116,8 @@ async function getUserTweets({ xUserId, limit = 5 }) {
         meta: apiMeta || buildMetaFromTweets([]),
       };
     }
+
+    const object = {};
 
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {

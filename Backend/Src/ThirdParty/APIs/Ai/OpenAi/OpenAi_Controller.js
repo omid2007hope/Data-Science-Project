@@ -6,15 +6,15 @@ async function analyzeTweet(req, res) {
   try {
     const tweets = await XTweetModel.find({});
 
-    const results = await Promise.all(
+    const tweetList = await Promise.all(
       tweets.map(async (tweet) => {
-        const data = await sendDataToAi(tweet.text);
-
-        return data;
+        return { text: tweet.text, id: tweet._id };
       })
     );
 
-    return res.status(200).json(results);
+    const data = await sendDataToAi(tweetList);
+
+    return res.status(200).json(data.results);
   } catch (error) {
     console.error("OpenAI Error | Controller", error.message);
     return res.status(500).json({

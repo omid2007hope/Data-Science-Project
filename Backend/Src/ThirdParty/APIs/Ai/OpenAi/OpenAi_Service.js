@@ -5,14 +5,18 @@ const XTweet = require("../../../../Data/Model/X_TweetCache");
 const DEFAULT_MODEL = "gpt-4o-mini";
 
 const SYSTEM_PROMPT = `
-You will receive a Tweet's content and context.
+You will receive one tweet or a list of tweets. Each tweet has:
+{ "id": "<id>", "text": "<tweet text>" }.
 
-Your response MUST follow this exact format:
+Your response MUST follow this exact format for each tweet:
 
+ID: <id>
 One-sentence result: <one concise sentence>
 Key words * <keyword 1> * <keyword 2> * <keyword 3>
 
 Rules:
+- Keep the same tweet order as input
+- Echo the exact ID from input
 - Exactly ONE sentence after "One-sentence result:"
 - Use "Key words *" format (asterisks, not commas)
 - No opinions
@@ -31,7 +35,7 @@ function buildPayload({ text, model = DEFAULT_MODEL }) {
       },
       {
         role: "user",
-        content: text,
+        content: JSON.stringify(text),
       },
     ],
   };
@@ -41,9 +45,15 @@ async function sendDataToAi(text) {
   const payload = buildPayload({
     text: text,
   });
+  console.log(payload);
   const { data } = await openAi_API.post("/responses", payload);
 
-  return data;
+  const outputText = extractOpenAiText(data);
+  return {
+    raw: data,
+    results: parseOpenAiBatchResult(outputText),
+    outputText,
+  };
 }
 
 function extractOpenAiText(data) {
@@ -80,6 +90,35 @@ function parseOpenAiResult(text) {
       .slice(0, 3) || [];
 
   return { oneSentence, keywords };
+}
+
+function parseOpenAiBatchResult(text) {
+  if (!text) return [];
+
+  const rawBlocks = text
+    .split(/(?=^ID:\s*)/gm)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  return rawBlocks.map((block) => {
+    const idMatch = block.match(/^ID:\s*(.+)$/im);
+    const oneSentenceMatch = block.match(/One-sentence result:\s*(.*)/i);
+    const keywordsMatch = block.match(/Key words\s*\*\s*(.*)/i);
+
+    const keywords =
+      keywordsMatch?.[1]
+        ?.split("*")
+        .map((k) => k.trim())
+        .filter(Boolean)
+        .slice(0, 3) || [];
+
+    return {
+      id: idMatch?.[1]?.trim() || null,
+      text: block,
+      oneSentence: oneSentenceMatch?.[1]?.trim() || null,
+      keywords,
+    };
+  });
 }
 
 async function analyzeTweetText({
