@@ -58,14 +58,14 @@ function buildMetaFromTweets(tweets) {
   };
 }
 
-// real stuff down here
+//! real stuff down here
+//! need to get fucking fixed
 
 async function getUserTweets({ xUserId, limit = 5 }) {
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
 
-  const safeLimit = Math.min(Math.max(Number(limit) || 5, 1), 100);
   let cached = [];
 
   // 1) CHECK CACHE (latest tweets for this user)
@@ -73,7 +73,7 @@ async function getUserTweets({ xUserId, limit = 5 }) {
   if (xUserId) {
     cached = await XTweet.find({ X_userID: xUserId })
       .sort({ created_at: -1 })
-      .limit(safeLimit)
+      .limit(limit)
       .lean();
 
     if (cached && cached.length) {
@@ -89,7 +89,7 @@ async function getUserTweets({ xUserId, limit = 5 }) {
     // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
     const response = await X_API.get(`/users/${xUserId}/tweets`, {
       params: {
-        max_results: safeLimit,
+        max_results: limit,
         exclude: "replies,retweets",
         "tweet.fields": "created_at,public_metrics,lang,display_text_range",
       },
@@ -108,7 +108,6 @@ async function getUserTweets({ xUserId, limit = 5 }) {
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {
         filter: { X_TweetID: tweet.id },
-        // here
         update: { $set: mapTweetForCache(tweet, xUserId) },
         upsert: true,
       },
