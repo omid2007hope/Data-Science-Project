@@ -14,15 +14,16 @@ function normalizePublicMetrics(metrics) {
   };
 }
 
-function mapTweetForCache(tweet, xUserId) {
+function mapTweetForCache(tweet, userId) {
   return {
     X_TweetID: tweet.id,
+
     text: tweet.text,
     created_at: tweet.created_at ? new Date(tweet.created_at) : null,
     lang: tweet.lang,
     display_text_range: tweet.display_text_range || null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
-    X_userID: xUserId || null,
+    X_userID: userId,
   };
 }
 
@@ -63,7 +64,12 @@ function buildMetaFromTweets(tweets) {
 
 const ONE_DAY_MS = 900_000;
 
-async function getUserTweets({ xUserId, limit = 5, timeLimit = ONE_DAY_MS }) {
+async function getUserTweets({
+  xUserId,
+  userId,
+  limit = 5,
+  timeLimit = ONE_DAY_MS,
+}) {
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
@@ -72,8 +78,8 @@ async function getUserTweets({ xUserId, limit = 5, timeLimit = ONE_DAY_MS }) {
 
   // 1) CHECK CACHE (latest tweets for this user)
   // here
-  if (xUserId) {
-    cached = await XTweet.find({ X_userID: xUserId })
+  if (userId) {
+    cached = await XTweet.find({ X_userID: userId })
       .sort({ created_at: -1 })
       .limit(limit)
       .lean();
@@ -122,7 +128,7 @@ async function getUserTweets({ xUserId, limit = 5, timeLimit = ONE_DAY_MS }) {
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {
         filter: { X_TweetID: tweet.id },
-        update: { $set: mapTweetForCache(tweet, xUserId) },
+        update: { $set: mapTweetForCache(tweet, userId) },
         upsert: true,
       },
     }));
