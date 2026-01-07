@@ -17,13 +17,12 @@ function normalizePublicMetrics(metrics) {
 function mapTweetForCache(tweet, userId) {
   return {
     X_TweetID: tweet.id,
-
+    X_userID: userId,
     text: tweet.text,
     created_at: tweet.created_at ? new Date(tweet.created_at) : null,
     lang: tweet.lang,
     display_text_range: tweet.display_text_range || null,
     public_metrics: normalizePublicMetrics(tweet.public_metrics),
-    X_userID: userId,
   };
 }
 
@@ -62,7 +61,7 @@ function buildMetaFromTweets(tweets) {
 //! real stuff down here
 //! need to get fucking fixed
 
-const ONE_DAY_MS = 900_000;
+const ONE_DAY_MS = 1;
 
 async function getUserTweets({
   xUserId,
