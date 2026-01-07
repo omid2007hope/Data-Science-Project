@@ -55,7 +55,7 @@ const XTweetSchema = new mongoose.Schema(
     public_metrics: PublicMetricsSchema,
 
     // Author reference
-    X_userID: {
+    X_MongoUserID: {
       type: mongoose.Schema.ObjectId,
       ref: "XUser",
     },
