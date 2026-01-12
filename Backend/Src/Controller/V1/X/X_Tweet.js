@@ -1,9 +1,12 @@
-const { X_GetTweetTimeLimit } = require("../../../Config/X_Config");
+const {
+  X_GetTweetTimeLimit,
+  X_GetTweetLimit,
+} = require("../../../Config/X_Config");
 
 async function getUserTweets({
   xUserId,
   userId,
-  limit = 5,
+  limit = X_GetTweetLimit,
   timeLimit = X_GetTweetTimeLimit,
 }) {
   if (!xUserId) {
@@ -103,3 +106,7 @@ async function getUserTweets({
     };
   }
 }
+
+module.exports = {
+  getUserTweets,
+};

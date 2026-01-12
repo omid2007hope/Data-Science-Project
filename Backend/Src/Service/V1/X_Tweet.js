@@ -1,10 +1,13 @@
 const {
   X_GetTweetTimeLimit,
   X_GetTweetLimit,
-} = require("../../../Config/X_Config");
-const model = require("../../Model/X_Tweet");
-const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
+} = require("../../Config/X_Config");
+
 const BaseService = require("../BaseService");
+
+const model = require("../../Model/X_Tweet");
+
+const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
 module.exports = new (class X_Tweet extends BaseService {
   getTweetTimeLimit(X_TweetData) {

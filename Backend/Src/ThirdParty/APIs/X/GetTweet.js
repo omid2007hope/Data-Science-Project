@@ -1,5 +1,7 @@
 const { X_GetTweetLimit } = require("../../../Config/X_Config");
 
+const X_API = require("./X_API");
+
 async function getTweet(xUserId) {
   const response = await X_API.get(`/users/${xUserId}/tweets`, {
     params: {
