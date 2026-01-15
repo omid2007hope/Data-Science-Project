@@ -35,7 +35,7 @@ module.exports = new (class X_User extends BaseService {
         name: data?.data?.name,
       };
 
-      const createObject = await this.create(objectStructure);
+      const createObject = await this.createObject(objectStructure);
 
       return {
         source: "x_api",

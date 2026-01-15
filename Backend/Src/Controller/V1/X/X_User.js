@@ -1,5 +1,5 @@
-const userNameService = require("../../../Service/V1/X_User");
-const getUserTweets = require("../../../Service/V1/X_Tweet");
+const xUserService = require("../../../Service/V1/X_User");
+const xTweetService = require("../../../Service/V1/X_Tweet");
 
 async function X_getIdByUserName(req, res) {
   const { username } = req.params;
@@ -9,7 +9,7 @@ async function X_getIdByUserName(req, res) {
   }
 
   try {
-    const userResult = await userNameService(username);
+    const userResult = await xUserService.userNameService(username);
 
     if (!userResult) {
       return res.status(404).json({ message: "User not found" });
@@ -25,7 +25,7 @@ async function X_getIdByUserName(req, res) {
 
     // ! here
 
-    const theId = await getUserTweets({
+    const theId = await xTweetService.getUserTweets({
       xUserId: userResult?.data?.X_ID,
       MongoUserId: userResult?.data?._id,
     });
