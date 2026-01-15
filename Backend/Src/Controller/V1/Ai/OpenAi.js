@@ -1,6 +1,6 @@
-const { sendDataToAi } = require("./OpenAi_Service");
+const { sendDataToAi } = require("../../../Service/V1/Ai/OpenAi");
 
-const XTweetModel = require("../../../../Data/Model/X_TweetCache");
+const XTweetModel = require("../../../Model/X_Tweet");
 
 async function analyzeTweet(req, res) {
   try {

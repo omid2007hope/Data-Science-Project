@@ -3,9 +3,7 @@ const router = express.Router();
 
 const getIdByUserNameController = require("../Controller/V1/X/X_User");
 
-const userRouter = require("../ThirdParty/APIs/X/userRouter");
-const googleTrendsRouter = require("../ThirdParty/APIs/GoogleTrends/googleTrendsRouter");
-const aiRouter = require("../ThirdParty/APIs/Ai/OpenAi/OpenAi_Router");
+const OpenAiController = require("../Controller/V1/Ai/OpenAi");
 
 // Health
 router.get("/", (req, res) => {
@@ -15,8 +13,6 @@ router.get("/", (req, res) => {
 // X API
 router.use("/x/user/:username", getIdByUserNameController.X_getIdByUserName);
 
-router.use("/ai", aiRouter);
-
-router.use("/google", googleTrendsRouter);
+router.use("/ai/tweet/analyze", OpenAiController.analyzeTweet);
 
 module.exports = router;

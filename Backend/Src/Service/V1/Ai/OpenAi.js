@@ -1,6 +1,6 @@
-const openAi_API = require("./OpenAi_API");
-const OpenAiTweetAnalysis = require("../../../../Data/Model/OpenAi_TweetAnalysis");
-const XTweet = require("../../../../Data/Model/X_TweetCache");
+const openAi_API = require("../../../ThirdParty/APIs/Ai/OpenAi/OpenAi_API");
+const OpenAiTweetAnalysis = require("../../../Model/X_TweetAnalysis");
+const XTweet = require("../../../Model/X_Tweet");
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
