@@ -8,6 +8,8 @@ import {
   CSS_generalBorder,
 } from "../libraries/CSS_General";
 
+import { Search } from "lucide-react";
+
 function Home() {
   return (
     <>
@@ -25,9 +27,9 @@ function Home() {
               className={`pl-2.5 pr-120 py-2.5 ${CSS_color_darkest} ${CSS_border_left}`}
             />
             <button
-              className={`py-2.5 px-5 ${CSS_color_darkest} ${CSS_border_right} ${CSS_flexCol}`}
+              className={`py-2.5 px-3 ${CSS_color_darkest} ${CSS_border_right} ${CSS_flexCol}`}
             >
-              x
+              <Search />
             </button>
           </div>
           <div className={`justify-center w-full h-9/10 ${CSS_flexCol}`}></div>
