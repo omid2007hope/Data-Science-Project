@@ -25,6 +25,8 @@ async function X_getIdByUserName(req, res) {
 
     // ! here
 
+    console.log(userResult);
+
     const theId = await xTweetService.getUserTweets({
       xUserId: userResult?.data?.X_ID,
       MongoUserId: userResult?.data?._id,

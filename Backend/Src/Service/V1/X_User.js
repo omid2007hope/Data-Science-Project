@@ -14,7 +14,7 @@ module.exports = new (class X_User extends BaseService {
       throw new Error("Username is required");
     }
     try {
-      const cached = await this.findOneByCondition({ username }).lean();
+      const cached = await this.model.findOne({ username: username }).lean();
 
       if (cached) {
         return {
