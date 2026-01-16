@@ -1,16 +1,36 @@
+import {
+  CSS_flexCol,
+  CSS_color_darkest,
+  CSS_H_W_full,
+  CSS_border_left,
+  CSS_border_right,
+  CSS_flexRow,
+  CSS_generalBorder,
+} from "../libraries/CSS_General";
+
 function Home() {
   return (
     <>
-      <div className="flex flex-col items-center justify-center w-full h-full bg-black pt-14">
-        <div className="w-4/10 h-9/10 flex flex-col items-center justify-between border border-white rounded-lg">
-          <div className="flex flex-row justify-center items-center w-full h-1/10 border-b border-white">
+      <div
+        className={`justify-center pt-14 ${CSS_H_W_full} ${CSS_flexCol} ${CSS_color_darkest}`}
+      >
+        <div
+          className={`w-4/10 md:w-8/10 h-9/10 justify-between ${CSS_generalBorder} ${CSS_flexCol} ${CSS_color_darkest}`}
+        >
+          <div
+            className={`justify-center w-full h-1/10 border-b ${CSS_flexRow} ${CSS_color_darkest} `}
+          >
             <input
               type="text"
-              className=" pl-2.5 pr-120 py-2.5 rounded-y-lg rounded-l-lg border border-white"
+              className={`pl-2.5 pr-120 py-2.5 ${CSS_color_darkest} ${CSS_border_left}`}
             />
-            <button className=""></button>
+            <button
+              className={`py-2.5 px-5 ${CSS_color_darkest} ${CSS_border_right} ${CSS_flexCol}`}
+            >
+              x
+            </button>
           </div>
-          <div className="flex justify-center items-center w-full h-9/10 border"></div>
+          <div className={`justify-center w-full h-9/10 ${CSS_flexCol}`}></div>
         </div>
       </div>
     </>

@@ -1,8 +1,8 @@
 import {
-  CSS_flexStyleRow,
-  CSS_flexStyleCol,
+  CSS_flexRow,
   CSS_fixPosition,
-  CSS_color,
+  CSS_color_darkest,
+  CSS_text_hover_active_colorBase,
 } from "../../libraries/CSS_General";
 
 function Header() {
@@ -16,17 +16,17 @@ function Header() {
   return (
     <>
       <header
-        className={`justify-between w-full h-1/20 border-b ${CSS_flexStyleRow} ${CSS_color} ${CSS_fixPosition}`}
+        className={`justify-center w-full h-1/20 border-b ${CSS_flexRow} ${CSS_color_darkest} ${CSS_fixPosition}`}
       >
-        <div className={`justify-evenly w-1/3 h-full ${CSS_flexStyleRow}`}>
+        <div className={`justify-evenly w-1/3 h-full ${CSS_flexRow}`}>
           {HeaderMenuOption.map((item) => {
             return (
               <div
                 key={item.id}
-                className={`justify-center w-1/4 h-full ${CSS_flexStyleRow}`}
+                className={`justify-center w-1/4 h-full ${CSS_flexRow}`}
               >
                 <button
-                  className={`justify-around ${CSS_flexStyleRow} ${CSS_color}`}
+                  className={`justify-around ${CSS_text_hover_active_colorBase} ${CSS_flexRow} ${CSS_color_darkest}`}
                 >
                   {item.option}
                 </button>
@@ -34,9 +34,6 @@ function Header() {
             );
           })}
         </div>
-        <div
-          className={`justify-evenly w-2/3 h-full ${CSS_flexStyleRow}`}
-        ></div>
       </header>
     </>
   );
