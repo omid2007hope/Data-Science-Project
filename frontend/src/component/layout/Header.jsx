@@ -23,7 +23,7 @@ function Header() {
         className={`justify-center w-full h-7/100 md:h-5/100 lg:h-5/100 border-b ${CSS_flexRow} ${CSS_color_darkest} ${CSS_fixPosition}`}
       >
         <div
-          className={`justify-evenly w-2/3 md:w-1/3 lg:w-1/3 h-full ${CSS_flexRow}`}
+          className={`justify-evenly w-3/3 md:w-1/3 lg:w-1/3 h-full ${CSS_flexRow}`}
         >
           {HeaderMenuOption.map((item) => {
             return (
