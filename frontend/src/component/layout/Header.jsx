@@ -1,13 +1,13 @@
 import {
-  CSS_flexRow,
-  CSS_fixPosition,
-  CSS_color_darkest,
-  CSS_color_dark,
-  CSS_color_light,
-  CSS_color_lightest,
-  CSS_text_hover_active_colorBase,
-  CSS_responsiveTextSize,
-} from "../../libraries/CSS_General";
+  CSS_FIXED_Z50,
+  CSS_H_FULL,
+  CSS_RESPONSIVE_TEXT_SIZE,
+  CSS_SURFACE_DARKER,
+  CSS_TEXT_HOVER_ACTIVE_COLOR_BASE,
+  CSS_flexRow_around,
+  CSS_flexRow_center,
+  CSS_flexRow_evenly,
+} from "../../libraries/CSS_Main";
 
 function Header() {
   const HeaderMenuOption = [
@@ -20,19 +20,19 @@ function Header() {
   return (
     <>
       <header
-        className={`justify-center w-full h-7/100 md:h-5/100 lg:h-5/100 border-b ${CSS_flexRow} ${CSS_color_darkest} ${CSS_fixPosition}`}
+        className={`w-full h-7/100 md:h-5/100 lg:h-5/100 border-b border-slate-700 ${CSS_flexRow_center} ${CSS_SURFACE_DARKER} ${CSS_FIXED_Z50}`}
       >
         <div
-          className={`justify-evenly w-3/3 md:w-1/3 lg:w-1/3 h-full ${CSS_flexRow}`}
+          className={`w-full md:w-1/3 lg:w-1/3 ${CSS_H_FULL} ${CSS_flexRow_evenly}`}
         >
           {HeaderMenuOption.map((item) => {
             return (
               <div
                 key={item.id}
-                className={`justify-center w-1/4 h-full ${CSS_flexRow} ${CSS_color_darkest}`}
+                className={`w-1/4 ${CSS_H_FULL} ${CSS_flexRow_center} ${CSS_SURFACE_DARKER}`}
               >
                 <button
-                  className={`justify-around ${CSS_responsiveTextSize} ${CSS_text_hover_active_colorBase} ${CSS_flexRow} ${CSS_color_darkest}`}
+                  className={`${CSS_RESPONSIVE_TEXT_SIZE} ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE} ${CSS_flexRow_around} ${CSS_SURFACE_DARKER}`}
                 >
                   {item.option}
                 </button>

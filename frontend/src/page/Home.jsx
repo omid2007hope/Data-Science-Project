@@ -2,20 +2,20 @@ import API from "../api/index";
 
 import { useState } from "react";
 import {
-  CSS_flexCol,
-  CSS_color_darkest,
-  CSS_color_dark,
-  CSS_color_light,
-  CSS_color_lightest,
-  CSS_H_W_full,
-  CSS_border_left,
-  CSS_border_right,
-  CSS_flexRow,
-  CSS_generalBorder,
-  CSS_text_hover_active_colorBase,
-  CSS_responsive_input_btn_height,
-  CSS_responsive_btn_width,
-} from "../libraries/CSS_General";
+  CSS_BORDER,
+  CSS_BORDER_Y_LEFT,
+  CSS_BORDER_Y_RIGHT,
+  CSS_H_FULL,
+  CSS_RESPONSIVE_BTN_SIZE,
+  CSS_RESPONSIVE_INPUT_HEIGHT,
+  CSS_SURFACE_DARK,
+  CSS_SURFACE_DARKER,
+  CSS_SURFACE_LIGHT,
+  CSS_TEXT_HOVER_ACTIVE_COLOR_BASE,
+  CSS_WH_full,
+  CSS_flexCol_center,
+  CSS_flexRow_center,
+} from "../libraries/CSS_Main";
 
 import { Search } from "lucide-react";
 
@@ -36,32 +36,32 @@ function Home() {
   return (
     <>
       <div
-        className={`justify-center pt-14 pb-4 ${CSS_H_W_full} ${CSS_flexCol} ${CSS_color_lightest}`}
+        className={`justify-center pt-14 pb-4 ${CSS_WH_full} ${CSS_flexCol_center} ${CSS_SURFACE_LIGHT}`}
       >
         <div
-          className={`w-9/10 md:w-8/10 h-10/10 md:h-9/10 lg:h-9/10 justify-between ${CSS_generalBorder} ${CSS_flexCol}`}
+          className={`w-9/10 md:w-8/10 h-10/10 md:h-9/10 lg:h-9/10 justify-between ${CSS_BORDER} ${CSS_flexCol_center}`}
         >
           <div
-            className={`justify-center w-full h-1/10 border-b ${CSS_flexRow} ${CSS_color_darkest}`}
+            className={`justify-center w-full h-1/10 border-b border-slate-700 ${CSS_flexRow_center} ${CSS_SURFACE_DARKER}`}
           >
             <input
               type="text"
               value={search}
-              className={`pl-2.5  w-60 md:w-100 lg:w-100 ${CSS_responsive_input_btn_height} ${CSS_color_dark} ${CSS_border_left}`}
+              className={`pl-2.5 w-60 md:w-100 lg:w-100 ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_SURFACE_DARK} ${CSS_BORDER_Y_LEFT}`}
               onChange={(e) => setSearch(e.target.value.trim())}
               onKeyDown={(e) => {
                 if (e.key === "Enter") searchSomething();
               }}
             />
             <button
-              className={`${CSS_responsive_btn_width} ${CSS_responsive_input_btn_height} ${CSS_color_darkest} ${CSS_border_right} ${CSS_flexCol} ${CSS_text_hover_active_colorBase}`}
+              className={`${CSS_RESPONSIVE_BTN_SIZE} ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_SURFACE_DARKER} ${CSS_BORDER_Y_RIGHT} ${CSS_flexCol_center} ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE}`}
               onClick={() => searchSomething()}
             >
               <Search />
             </button>
           </div>
           <div
-            className={`justify-center w-full h-9/10 ${CSS_flexCol} ${CSS_color_light}`}
+            className={`justify-center w-full h-9/10 ${CSS_flexCol_center} ${CSS_SURFACE_LIGHT}`}
           >
             s
           </div>
