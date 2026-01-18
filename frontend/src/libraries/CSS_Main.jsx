@@ -54,13 +54,16 @@ export const CSS_flexCol_center_safe = `flex flex-col items-center justify-cente
 
 // ! border
 
-export const CSS_BORDER_Y_LEFT = "border-y border-l rounded-l-md";
+export const CSS_BORDER_Y_LEFT = "border-y border-l rounded-y-lg  rounded-l-lg";
 
-export const CSS_BORDER_Y_RIGHT = "border-y border-r rounded-r-md";
+export const CSS_BORDER_Y_RIGHT = "border-y border-r rounded-y-lg rounded-r-lg";
 
-export const CSS_BORDER_X_TOP = "border-x border-t rounded-t-md";
+export const CSS_BORDER_X_TOP = "border-x border-t rounded-x-lg rounded-t-lg";
 
-export const CSS_BORDER_X_BOTTOM = "border-x border-b rounded-b-md";
+export const CSS_BORDER_X_BOTTOM =
+  "border-x border-b rounded-x-lg rounded-b-lg";
+
+export const CSS_BORDER_FULL = "border rounded-lg";
 
 // ! colors
 
