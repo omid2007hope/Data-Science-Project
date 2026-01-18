@@ -64,17 +64,17 @@ export const CSS_BORDER_X_BOTTOM = "border-x border-b rounded-b-md";
 
 // ! colors
 
-export const CSS_COLOR_950 = "bg-slate-950 text-white border-white";
+export const CSS_COLOR_950 = "bg-slate-950 text-white/80 border-white/25";
 
-export const CSS_COLOR_700 = "bg-slate-700 text-white border-white";
+export const CSS_COLOR_700 = "bg-slate-700 text-white/80 border-white/25";
 
-export const CSS_COLOR_500 = "bg-slate-500 text-white border-white";
+export const CSS_COLOR_500 = "bg-slate-500 text-white/80 border-white/25";
 
-export const CSS_COLOR_300 = "bg-slate-300 text-white border-white";
+export const CSS_COLOR_300 = "bg-slate-300 text-black/80 border-black/65";
 
-export const CSS_COLOR_100 = "bg-slate-100 text-white border-white";
+export const CSS_COLOR_100 = "bg-slate-100 text-black/80 border-black/65";
 
-export const CSS_COLOR_50 = "bg-slate-50 text-white border-white";
+export const CSS_COLOR_50 = "bg-slate-50 text-black/80 border-black/65";
 
 // ! responisve
 

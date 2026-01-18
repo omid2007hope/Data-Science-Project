@@ -11,9 +11,9 @@ import {
 function Header() {
   const HeaderMenuOption = [
     { id: 1, option: "Home" },
-    { id: 2, option: "account" },
-    { id: 3, option: "about" },
-    { id: 4, option: "terms of service" },
+    { id: 2, option: "Account" },
+    { id: 3, option: "About" },
+    { id: 4, option: "TOS" },
   ];
 
   return (
