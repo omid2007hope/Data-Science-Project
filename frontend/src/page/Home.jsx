@@ -1,3 +1,5 @@
+import API from "../api/index";
+
 import { useState } from "react";
 import {
   CSS_flexCol,
@@ -23,6 +25,7 @@ function Home() {
   const searchSomething = () => {
     if (search) {
       console.log(search);
+      API(search);
       setSearch("");
     } else {
       alert("Input is empty");
