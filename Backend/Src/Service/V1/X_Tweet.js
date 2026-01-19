@@ -35,7 +35,10 @@ module.exports = new (class X_Tweet extends BaseService {
     }
 
     if (MongoUserId) {
-      return this.checkTweetCache(MongoUserId);
+      const cacheResult = await this.checkTweetCache({ MongoUserId });
+      if (cacheResult) {
+        return cacheResult;
+      }
     }
 
     try {
