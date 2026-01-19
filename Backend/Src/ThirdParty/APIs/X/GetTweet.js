@@ -3,6 +3,7 @@ const { X_GetTweetLimit } = require("../../../Config/X_Config");
 const X_API = require("./X_API");
 
 async function getTweet(xUserId) {
+  //! Get the Tweets from API with ID
   const response = await X_API.get(`/users/${xUserId}/tweets`, {
     params: {
       max_results: X_GetTweetLimit,
@@ -11,13 +12,26 @@ async function getTweet(xUserId) {
     },
   });
 
+  console.log(
+    ".................................................................",
+  );
+  console.log("from GetTweet.js - xUserId", xUserId);
+  console.log(
+    ".................................................................",
+  );
+
+  //! simplifying the data
   const apiTweets = response?.data?.data || [];
   const apiMeta = response?.data?.meta || null;
+
+  console.log("Directly from GetTweet.js", apiTweets);
+  console.log("Directly from GetTweet.js", apiMeta);
 
   if (!apiTweets.length) {
     return null;
   }
 
+  //!  return the data
   return { apiTweets, apiMeta };
 }
 module.exports = {

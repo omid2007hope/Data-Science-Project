@@ -1,7 +1,4 @@
-const {
-  X_GetTweetTimeLimit,
-  X_GetTweetLimit,
-} = require("../../Config/X_Config");
+const { X_GetTweetLimit } = require("../../Config/X_Config");
 
 const BaseService = require("../BaseService");
 
@@ -10,30 +7,16 @@ const model = require("../../Model/X_Tweet");
 const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
 module.exports = new (class X_Tweet extends BaseService {
-  getTweetTimeLimit(X_TweetData) {
-    const newestCacheAt =
-      X_TweetData?.[0]?.updatedAt || X_TweetData?.[0]?.createdAt || null;
-    const cacheAgeMs = newestCacheAt
-      ? Date.now() - new Date(newestCacheAt).getTime()
-      : null;
-    const isCacheFresh =
-      typeof cacheAgeMs === "number" &&
-      cacheAgeMs >= 0 &&
-      cacheAgeMs < X_GetTweetTimeLimit;
-
-    return isCacheFresh;
-  }
-
   async checkTweetCache({ MongoUserId }) {
+    //! Check the DataBase for TweetData
     const X_TweetData = await this.model
       .find({ X_MongoUserID: MongoUserId })
       .sort({ created_at: -1 })
       .limit(X_GetTweetLimit)
       .lean();
 
-    const isCacheFresh = this.getTweetTimeLimit(X_TweetData);
-
-    if (X_TweetData && X_TweetData.length && isCacheFresh) {
+    //! If TweetData already exist in DataBase -> get it from DataBase
+    if (X_TweetData && X_TweetData.length) {
       return {
         data: X_TweetData.map((tweet) => mapTweetForResponse(tweet)),
         meta: buildMetaFromTweets(X_TweetData),
@@ -42,17 +25,27 @@ module.exports = new (class X_Tweet extends BaseService {
     }
   }
 
+  //! Reciving the Ids
   async getUserTweets({ xUserId, MongoUserId }) {
+    console.log("From X_Tweet.js(Service) - xUserId", xUserId);
+    console.log("From X_Tweet.js(Service) - MongoUserId", MongoUserId);
+
     if (!xUserId) {
       throw new Error("xUserId is required");
     }
 
     if (MongoUserId) {
-      return this.checkTweetCache();
+      return this.checkTweetCache(MongoUserId);
     }
 
     try {
+      //! Sending the xUserId toward GetTweet
       const tweetResponse = await getTweet(xUserId);
+
+      console.log(
+        "From X_Tweet.js(Service) - tweetResponse.apiTweets",
+        tweetResponse.apiTweets,
+      );
 
       if (!tweetResponse) {
         return {
@@ -61,8 +54,13 @@ module.exports = new (class X_Tweet extends BaseService {
         };
       }
 
+      //! ......................................................
+      //! ......................................................
+      //! ......................................................
+
       const createdTweets = await Promise.all(
         tweetResponse.apiTweets.map(async (tweet) => {
+          //! Build the data structure
           const objectStructure = {
             X_TweetID: "",
             text: "",
@@ -83,7 +81,7 @@ module.exports = new (class X_Tweet extends BaseService {
           const createObject = await this.createObject(objectStructure);
 
           return createObject;
-        })
+        }),
       );
 
       return {

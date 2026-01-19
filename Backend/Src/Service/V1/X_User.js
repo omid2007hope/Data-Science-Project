@@ -1,20 +1,36 @@
+//! This service has currently no problem and runs without any problem
+//! This service has currently no problem and runs without any problem
+//! This service has currently no problem and runs without any problem
+//! This service has currently no problem and runs without any problem
+//! This service has currently no problem and runs without any problem
+//! This service has currently no problem and runs without any problem
+
+//! Importing Model
 const model = require("../../Model/X_User");
+//! Importing BaseService
 const BaseService = require("../BaseService");
+//! Importing API
 const X_API = require("../../ThirdParty/APIs/X/X_API");
 
 /**
- * Fetch X user data by username
+ * !Fetch X user data by username
  * @param {string} username
  * @returns {Object} X user data
  */
 
 module.exports = new (class X_User extends BaseService {
+  //! Reciving the username || example (elonmusk)
+
   async userNameService(username) {
     if (!username) {
       throw new Error("Username is required");
     }
     try {
+      //! Check if username already exist in DataBase or not
+
       const cached = await this.model.findOne({ username: username }).lean();
+
+      //! If the username already exist in the DataBase -> get it from the DataBase
 
       if (cached) {
         return {
@@ -23,11 +39,11 @@ module.exports = new (class X_User extends BaseService {
         };
       }
 
-      // !.. here
+      //! If not -> get it directly from the API
 
       const { data } = await X_API.get(`/users/by/username/${username}`);
 
-      // !.. here
+      //! Build the data structure
 
       const objectStructure = {
         username: username,
@@ -35,12 +51,16 @@ module.exports = new (class X_User extends BaseService {
         name: data?.data?.name,
       };
 
+      //! Save it in the DataBase
+
       const createObject = await this.createObject(objectStructure);
+
+      //! Return the Data
 
       return {
         source: "x_api",
         data: createObject,
-      };
+      }; //! Catch error
     } catch (error) {
       console.error("X API Error | userNameService()", {
         username,
@@ -48,7 +68,6 @@ module.exports = new (class X_User extends BaseService {
         message: error.message,
         apiError: error.response?.data,
       });
-
       throw error;
     }
   }

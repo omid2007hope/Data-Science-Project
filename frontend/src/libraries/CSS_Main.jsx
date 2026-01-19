@@ -81,13 +81,11 @@ export const CSS_COLOR_50 = "bg-slate-50 text-black/80 border-black/65";
 
 // ! responisve
 
-export const CSS_RESPONSIVE_TEXT_SIZE = "text-sm md:text-base lg:text-lg";
+export const CSS_RESPONSIVE_TEXT_SIZE = "text-sm md:text-base lg:text-md";
 
-export const CSS_RESPONSIVE_INPUT_HIGHT = "py-1.5 md:py-2.5 lg:py-3";
+export const CSS_RESPONSIVE_BTN_SIZE = "p-1.5 md:p-1.5 lg:p-1.5";
 
-export const CSS_RESPONSIVE_BTN_SIZE = "p-1.5 md:p-3 lg:p-4";
-
-export const CSS_RESPONSIVE_INPUT_HEIGHT = "py-1.5 md:py-2.5 lg:py-3";
+export const CSS_RESPONSIVE_INPUT_HEIGHT = "py-1.5 md:py-1.5 lg:py-1.5";
 
 // ! animations
 
