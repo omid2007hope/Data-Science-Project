@@ -1,33 +1,17 @@
 const { X_GetTweetLimit } = require("../../Config/X_Config");
-
 const BaseService = require("../BaseService");
-
 const model = require("../../Model/X_Tweet");
-
 const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
-const mapTweetForCache = (tweet, mongoUserId) => ({
-  X_TweetID: tweet.id,
-  text: tweet.text,
-  created_at: tweet.created_at ? new Date(tweet.created_at) : null,
-  lang: tweet.lang || "",
-  display_text_range: tweet.display_text_range || [0, 0],
-  public_metrics: tweet.public_metrics || {},
-  X_MongoUserID: mongoUserId || null,
-});
-
-const mapTweetForResponse = (tweet) => ({
-  id: tweet.X_TweetID || tweet.id,
-  text: tweet.text,
-  created_at: tweet.created_at,
-  lang: tweet.lang,
-  display_text_range: tweet.display_text_range,
-  public_metrics: tweet.public_metrics,
-});
+//! ......................................................
+//! ......................................................
 
 const buildMetaFromTweets = (tweets) => ({
   result_count: Array.isArray(tweets) ? tweets.length : 0,
 });
+
+//! ......................................................
+//! ......................................................
 
 module.exports = new (class X_Tweet extends BaseService {
   async checkTweetCache({ MongoUserId }) {
@@ -38,24 +22,36 @@ module.exports = new (class X_Tweet extends BaseService {
       .limit(X_GetTweetLimit)
       .lean();
 
+    //! ......................................................
+    //! ......................................................
+
     //! If TweetData already exist in DataBase -> get it from DataBase
     if (X_TweetData && X_TweetData.length) {
       return {
-        data: X_TweetData.map((tweet) => mapTweetForResponse(tweet)),
+        data: X_TweetData,
         meta: buildMetaFromTweets(X_TweetData),
         source: "cache",
       };
     }
   }
 
+  //! ......................................................
+  //! ......................................................
+
   //! Reciving the Ids
   async getUserTweets({ xUserId, MongoUserId }) {
     console.log("From X_Tweet.js(Service) - xUserId", xUserId);
     console.log("From X_Tweet.js(Service) - MongoUserId", MongoUserId);
 
+    //! ......................................................
+    //! ......................................................
+
     if (!xUserId) {
       throw new Error("xUserId is required");
     }
+
+    //! ......................................................
+    //! ......................................................
 
     if (MongoUserId) {
       const cacheResult = await this.checkTweetCache({ MongoUserId });
@@ -64,18 +60,28 @@ module.exports = new (class X_Tweet extends BaseService {
       }
     }
 
+    //! ......................................................
+    //! ......................................................
+
     try {
       //! Sending the xUserId toward GetTweet
       const tweetResponse = await getTweet(xUserId);
 
+      //! ......................................................
+      //! ......................................................
+
       const apiTweets = tweetResponse?.apiTweets || [];
       const apiMeta = tweetResponse?.apiMeta || null;
 
+      //! ......................................................
+      //! ......................................................
       console.log(
         "From X_Tweet.js(Service) - tweetResponse.apiTweets",
         apiTweets,
       );
 
+      //! ......................................................
+      //! ......................................................
       if (!apiTweets.length) {
         return {
           data: [],
@@ -86,9 +92,10 @@ module.exports = new (class X_Tweet extends BaseService {
 
       //! ......................................................
       //! ......................................................
-      //! ......................................................
 
       const createdTweets = await Promise.all(
+        //! ......................................................
+        //! ......................................................
         apiTweets.map(async (tweet) => {
           //! Build the data structure
           const objectStructure = {
@@ -106,21 +113,41 @@ module.exports = new (class X_Tweet extends BaseService {
               impression_count: tweet.public_metrics?.impression_count || 0,
             },
             X_MongoUserID: MongoUserId || null,
+            X_UserID: xUserId || null,
           };
 
-          const createObject = await this.createObject(objectStructure);
-
-          return createObject;
+          //! ......................................................
+          //! ......................................................
+          try {
+            const createObject = await this.createObject(objectStructure);
+            return createObject;
+          } catch (createErr) {
+            //! ......................................................
+            //! ......................................................
+            if (createErr?.code === 11000) {
+              return this.model.findOne({ X_TweetID: tweet.id });
+            }
+            throw createErr;
+          }
         }),
       );
 
+      //! ......................................................
+      //! ......................................................
+
       return {
-        data: apiTweets.map((tweet) => mapTweetForResponse(tweet)),
-        meta: apiMeta || buildMetaFromTweets(apiTweets),
+        data: createdTweets.filter(Boolean),
+        meta: apiMeta || buildMetaFromTweets(createdTweets.filter(Boolean)),
         source: "x_api",
       };
+
+      //! ......................................................
+      //! ......................................................
     } catch (err) {
       const status = err.response?.status;
+
+      //! ......................................................
+      //! ......................................................
 
       if (MongoUserId) {
         const cacheFallback = await this.checkTweetCache({ MongoUserId });
@@ -128,6 +155,9 @@ module.exports = new (class X_Tweet extends BaseService {
           return { ...cacheFallback, source: "cache_fallback" };
         }
       }
+
+      //! ......................................................
+      //! ......................................................
 
       if (status === 429) {
         const reset = err.response?.headers["x-rate-limit-reset"];
@@ -138,6 +168,9 @@ module.exports = new (class X_Tweet extends BaseService {
           resetAt: reset ? Number(reset) * 1000 : null,
         };
       }
+
+      //! ......................................................
+      //! ......................................................
 
       throw {
         status: status || 500,
