@@ -6,6 +6,29 @@ const model = require("../../Model/X_Tweet");
 
 const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
+const mapTweetForCache = (tweet, mongoUserId) => ({
+  X_TweetID: tweet.id,
+  text: tweet.text,
+  created_at: tweet.created_at ? new Date(tweet.created_at) : null,
+  lang: tweet.lang || "",
+  display_text_range: tweet.display_text_range || [0, 0],
+  public_metrics: tweet.public_metrics || {},
+  X_MongoUserID: mongoUserId || null,
+});
+
+const mapTweetForResponse = (tweet) => ({
+  id: tweet.X_TweetID || tweet.id,
+  text: tweet.text,
+  created_at: tweet.created_at,
+  lang: tweet.lang,
+  display_text_range: tweet.display_text_range,
+  public_metrics: tweet.public_metrics,
+});
+
+const buildMetaFromTweets = (tweets) => ({
+  result_count: Array.isArray(tweets) ? tweets.length : 0,
+});
+
 module.exports = new (class X_Tweet extends BaseService {
   async checkTweetCache({ MongoUserId }) {
     //! Check the DataBase for TweetData
@@ -69,20 +92,20 @@ module.exports = new (class X_Tweet extends BaseService {
         apiTweets.map(async (tweet) => {
           //! Build the data structure
           const objectStructure = {
-            X_TweetID: "",
-            text: "",
-            created_at: null,
-            lang: "",
-            display_text_range: [0, 0],
+            X_TweetID: tweet.id,
+            text: tweet.text,
+            created_at: tweet.created_at ? new Date(tweet.created_at) : null,
+            lang: tweet.lang || "",
+            display_text_range: tweet.display_text_range || [0, 0],
             public_metrics: {
-              retweet_count: 0,
-              reply_count: 0,
-              like_count: 0,
-              quote_count: 0,
-              bookmark_count: 0,
-              impression_count: 0,
+              retweet_count: tweet.public_metrics?.retweet_count || 0,
+              reply_count: tweet.public_metrics?.reply_count || 0,
+              like_count: tweet.public_metrics?.like_count || 0,
+              quote_count: tweet.public_metrics?.quote_count || 0,
+              bookmark_count: tweet.public_metrics?.bookmark_count || 0,
+              impression_count: tweet.public_metrics?.impression_count || 0,
             },
-            X_MongoUserID: null,
+            X_MongoUserID: MongoUserId || null,
           };
 
           const createObject = await this.createObject(objectStructure);
