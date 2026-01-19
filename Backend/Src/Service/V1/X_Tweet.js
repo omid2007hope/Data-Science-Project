@@ -45,15 +45,19 @@ module.exports = new (class X_Tweet extends BaseService {
       //! Sending the xUserId toward GetTweet
       const tweetResponse = await getTweet(xUserId);
 
+      const apiTweets = tweetResponse?.apiTweets || [];
+      const apiMeta = tweetResponse?.apiMeta || null;
+
       console.log(
         "From X_Tweet.js(Service) - tweetResponse.apiTweets",
-        tweetResponse.apiTweets,
+        apiTweets,
       );
 
-      if (!tweetResponse) {
+      if (!apiTweets.length) {
         return {
           data: [],
           meta: apiMeta || buildMetaFromTweets([]),
+          source: "x_api",
         };
       }
 
@@ -62,7 +66,7 @@ module.exports = new (class X_Tweet extends BaseService {
       //! ......................................................
 
       const createdTweets = await Promise.all(
-        tweetResponse.apiTweets.map(async (tweet) => {
+        apiTweets.map(async (tweet) => {
           //! Build the data structure
           const objectStructure = {
             X_TweetID: "",
@@ -95,12 +99,11 @@ module.exports = new (class X_Tweet extends BaseService {
     } catch (err) {
       const status = err.response?.status;
 
-      if (X_TweetData.length) {
-        return {
-          data: X_TweetData.map((tweet) => mapTweetForResponse(tweet)),
-          meta: buildMetaFromTweets(X_TweetData),
-          source: "cache_fallback",
-        };
+      if (MongoUserId) {
+        const cacheFallback = await this.checkTweetCache({ MongoUserId });
+        if (cacheFallback) {
+          return { ...cacheFallback, source: "cache_fallback" };
+        }
       }
 
       if (status === 429) {
