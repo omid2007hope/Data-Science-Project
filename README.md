@@ -1,5 +1,3 @@
-# StockMarket
-
 Full-stack app that pulls X (Twitter) user tweets, stores them in MongoDB, and can run OpenAI-based analysis. The frontend is a Vite + React UI that triggers the backend API.
 
 ## Features
