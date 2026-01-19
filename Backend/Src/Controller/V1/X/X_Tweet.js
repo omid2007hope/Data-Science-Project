@@ -3,25 +3,38 @@ const {
   X_GetTweetLimit,
 } = require("../../../Config/X_Config");
 
+//! ......................................................
+//! ......................................................
+
 async function getUserTweets({
   xUserId,
   userId,
   limit = X_GetTweetLimit,
   timeLimit = X_GetTweetTimeLimit,
 }) {
+  //! ......................................................
+  //! ......................................................
+
   if (!xUserId) {
     throw new Error("xUserId is required");
   }
 
+  //! ......................................................
+  //! ......................................................
+
   let X_TweetData = [];
 
-  // 1) CHECK CACHE (latest tweets for this user)
-  // here
+  //! ......................................................
+  //! ......................................................
+
   if (userId) {
     X_TweetData = await XTweet.find({ X_userID: userId })
       .sort({ created_at: -1 })
       .limit(limit)
       .lean();
+
+    //! ......................................................
+    //! ......................................................
 
     const newestCacheAt =
       X_TweetData?.[0]?.updatedAt || X_TweetData?.[0]?.createdAt || null;
@@ -33,6 +46,9 @@ async function getUserTweets({
       cacheAgeMs >= 0 &&
       cacheAgeMs < timeLimit;
 
+    //! ......................................................
+    //! ......................................................
+
     if (X_TweetData && X_TweetData.length && isCacheFresh) {
       return {
         data: X_TweetData.map((tweet) => mapTweetForResponse(tweet)),
@@ -42,8 +58,13 @@ async function getUserTweets({
     }
   }
 
+  //! ......................................................
+  //! ......................................................
+
   try {
-    // 2) FETCH FROM X API (OFFICIAL ENDPOINT)
+    //! ......................................................
+    //! ......................................................
+
     const response = await X_API.get(`/users/${xUserId}/tweets`, {
       params: {
         max_results: limit,
@@ -52,8 +73,14 @@ async function getUserTweets({
       },
     });
 
+    //! ......................................................
+    //! ......................................................
+
     const apiTweets = response?.data?.data || [];
     const apiMeta = response?.data?.meta || null;
+
+    //! ......................................................
+    //! ......................................................
 
     if (!apiTweets.length) {
       return {
@@ -61,6 +88,9 @@ async function getUserTweets({
         meta: apiMeta || buildMetaFromTweets([]),
       };
     }
+
+    //! ......................................................
+    //! ......................................................
 
     const cacheWrites = apiTweets.map((tweet) => ({
       updateOne: {
@@ -70,8 +100,13 @@ async function getUserTweets({
       },
     }));
 
-    // 3) UPSERT (SAFE FOR CACHING)
+    //! ......................................................
+    //! ......................................................
+
     await XTweet.bulkWrite(cacheWrites, { ordered: false });
+
+    //! ......................................................
+    //! ......................................................
 
     return {
       data: apiTweets.map((tweet) => mapTweetForResponse(tweet)),
@@ -79,7 +114,13 @@ async function getUserTweets({
       source: "x_api",
     };
   } catch (err) {
+    //! ......................................................
+    //! ......................................................
+
     const status = err.response?.status;
+
+    //! ......................................................
+    //! ......................................................
 
     if (X_TweetData.length) {
       return {
@@ -88,6 +129,9 @@ async function getUserTweets({
         source: "cache_fallback",
       };
     }
+
+    //! ......................................................
+    //! ......................................................
 
     if (status === 429) {
       const reset = err.response?.headers["x-rate-limit-reset"];
@@ -99,6 +143,9 @@ async function getUserTweets({
       };
     }
 
+    //! ......................................................
+    //! ......................................................
+
     throw {
       status: status || 500,
       message: "Failed to fetch user tweets",
@@ -106,6 +153,9 @@ async function getUserTweets({
     };
   }
 }
+
+//! ......................................................
+//! ......................................................
 
 module.exports = {
   getUserTweets,
