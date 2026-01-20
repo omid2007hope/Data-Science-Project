@@ -1,26 +1,20 @@
+//! ......................................................
+//! Importing
 const { X_GetTweetLimit } = require("../../Config/X_Config");
 const BaseService = require("../BaseService");
 const model = require("../../Model/X_Tweet");
 const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
 //! ......................................................
-//! ......................................................
+//! I don't know what it does
 
 const buildMetaFromTweets = (tweets) => ({
   result_count: Array.isArray(tweets) ? tweets.length : 0,
 });
-
-//! ......................................................
-//! ......................................................
-
 module.exports = new (class X_Tweet extends BaseService {
   //! ......................................................
-  //! ......................................................
-
+  //! Check the DataBase using MongoUserId(ObjectId)
   async checkTweetCache({ MongoUserId }) {
-    //! ......................................................
-    //! Check the DataBase for TweetData
-
     const X_TweetData = await this.model
       .find({ X_MongoUserID: MongoUserId })
       .sort({ created_at: -1 })
@@ -41,24 +35,23 @@ module.exports = new (class X_Tweet extends BaseService {
 
   //! ......................................................
   //! Reciving the Ids
+  //! ......................................................
 
   async getUserTweets({ xUserId, MongoUserId }) {
     //! ......................................................
-    //! ......................................................
-
+    //! Console logs
     console.log("From X_Tweet.js(Service) - xUserId", xUserId);
     console.log("From X_Tweet.js(Service) - MongoUserId", MongoUserId);
 
     //! ......................................................
-    //! ......................................................
+    //! Throw an error if xUserId dose not exist
 
     if (!xUserId) {
       throw new Error("xUserId is required");
     }
 
     //! ......................................................
-    //! ......................................................
-
+    //! Pass the MongoUserId(objectId) to checkTweetCache function
     if (MongoUserId) {
       const cacheResult = await this.checkTweetCache({ MongoUserId });
       if (cacheResult) {
@@ -71,24 +64,26 @@ module.exports = new (class X_Tweet extends BaseService {
 
     try {
       //! ......................................................
-      //! Sending the xUserId toward GetTweet
+      //! Reciving the data
       const tweetResponse = await getTweet(xUserId);
 
       //! ......................................................
-      //! ......................................................
+      //! simplifying the data
 
       const apiTweets = tweetResponse?.apiTweets || [];
       const apiMeta = tweetResponse?.apiMeta || null;
 
       //! ......................................................
-      //! ......................................................
+      //! Console log
+
       console.log(
         "From X_Tweet.js(Service) - tweetResponse.apiTweets",
         apiTweets,
       );
 
       //! ......................................................
-      //! ......................................................
+      //! Return the Data
+
       if (!apiTweets.length) {
         return {
           data: [],
@@ -98,7 +93,7 @@ module.exports = new (class X_Tweet extends BaseService {
       }
 
       //! ......................................................
-      //! ......................................................
+      //! There might be a bug down here
 
       const createdTweets = await Promise.all(
         apiTweets.map(async (tweet) => {
@@ -124,9 +119,33 @@ module.exports = new (class X_Tweet extends BaseService {
           };
 
           //! ......................................................
+          //! Check similar ids to avoid duplications
+
+          const existingTweet = await this.model.findOne({
+            X_TweetID: tweet.id,
+          });
+
+          //! ......................................................
+          //! Update the data if Ids were similar
+
+          if (existingTweet) {
+            await this.model.updateOne(
+              { _id: existingTweet._id },
+              { $set: objectStructure },
+            );
+
+            //! ......................................................
+            //! Return the data
+
+            return this.model.findById(existingTweet._id);
+          }
+
+          //! ......................................................
           //! ......................................................
 
           try {
+            //! ......................................................
+            //! Save the data in the DataBase
             const createObject = await this.createObject(objectStructure);
             return createObject;
 
