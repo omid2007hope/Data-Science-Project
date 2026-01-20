@@ -70,6 +70,8 @@ function Home() {
     }
   };
 
+  const showAll = () => {};
+
   return (
     <>
       <div
@@ -103,7 +105,10 @@ function Home() {
             <div
               className={`w-1/2 h-full ${CSS_flexRow_center} ${CSS_COLOR_950}`}
             >
-              <button className={`py-1.5 px-5 ${CSS_BORDER_FULL}`}>
+              <button
+                className={`py-1.5 px-5 ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE} ${CSS_COLOR_950} ${CSS_BORDER_FULL}`}
+                onClick={() => showAll()}
+              >
                 Show All
               </button>
             </div>
