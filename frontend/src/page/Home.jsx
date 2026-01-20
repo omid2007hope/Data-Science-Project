@@ -1,4 +1,4 @@
-import API from "../api/index";
+import API, { fetchTweetAnalyses } from "../api/index";
 
 import { useState } from "react";
 import {
@@ -30,34 +30,8 @@ import {
 import { Search } from "lucide-react";
 
 function Home() {
-  const summeryList = [
-    {
-      id: 1,
-      summery:
-        "Rockstar Games gave a terminally ill fan with only 6–12 months to live, the chance to experience GTA 6",
-      date: "01-01-2026-12:00",
-    },
-    {
-      id: 2,
-      summery:
-        "Rockstar Games gave a terminally ill fan with only 6–12 months to live, the chance to experience GTA 6",
-      date: "01-01-2026-12:00",
-    },
-    {
-      id: 3,
-      summery:
-        "Rockstar Games gave a terminally ill fan with only 6–12 months to live, the chance to experience GTA 6",
-      date: "01-01-2026-12:00",
-    },
-    {
-      id: 4,
-      summery:
-        "Rockstar Games gave a terminally ill fan with only 6–12 months to live, the chance to experience GTA 6",
-      date: "01-01-2026-12:00",
-    },
-  ];
-
   const [search, setSearch] = useState("");
+  const [summeryList, setSummeryList] = useState([]);
 
   const searchSomething = () => {
     if (search) {
@@ -70,7 +44,27 @@ function Home() {
     }
   };
 
-  const showAll = () => {};
+  const showAll = async () => {
+    try {
+      const data = await fetchTweetAnalyses();
+      const mapped = (data || []).map((item) => ({
+        id: item._id,
+        summery: item.oneSentence || item.text || "",
+        date: item.createdAt || item.updatedAt || "",
+      }));
+      setSummeryList(mapped);
+    } catch (error) {
+      console.error("Show all failed:", error.message);
+      alert("Failed to load summaries");
+    }
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "Unknown";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Unknown";
+    return date.toLocaleString();
+  };
 
   return (
     <>
@@ -129,7 +123,7 @@ function Home() {
                     <span
                       className={`text-sm text-white/65 w-full h-1/3 ${CSS_flexCol_end}`}
                     >
-                      Date: {item.date}
+                      Date: {formatDate(item.date)}
                     </span>
                   </h1>
                 </div>

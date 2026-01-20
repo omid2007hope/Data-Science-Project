@@ -14,5 +14,6 @@ router.get("/", (req, res) => {
 router.use("/x/user/:username", getIdByUserNameController.X_getIdByUserName);
 
 router.use("/ai/tweet/analyze", OpenAiController.analyzeTweet);
+router.get("/ai/tweet/analyses", OpenAiController.getAllTweetAnalyses);
 
 module.exports = router;

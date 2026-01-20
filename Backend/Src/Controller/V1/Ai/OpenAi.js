@@ -49,6 +49,23 @@ async function analyzeTweet(req, res) {
   }
 }
 
+async function getAllTweetAnalyses(req, res) {
+  try {
+    const analyses = await XTweetAnalysisModel.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json(analyses);
+  } catch (error) {
+    console.error("Tweet Analysis Fetch Error | Controller", error.message);
+    return res.status(500).json({
+      message: "Failed to fetch tweet analyses",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   analyzeTweet,
+  getAllTweetAnalyses,
 };
