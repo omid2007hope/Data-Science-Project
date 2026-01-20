@@ -1,42 +1,10 @@
 //! ......................................................
 //! Importing
-const { X_GetTweetLimit } = require("../../Config/X_Config");
 const BaseService = require("../BaseService");
 const model = require("../../Model/X_Tweet");
 const { getTweet } = require("../../ThirdParty/APIs/X/GetTweet");
 
-//! ......................................................
-//! I don't know what it does
-
-const buildMetaFromTweets = (tweets) => ({
-  result_count: Array.isArray(tweets) ? tweets.length : 0,
-});
 module.exports = new (class X_Tweet extends BaseService {
-  //! ......................................................
-  //! Check the DataBase using MongoUserId(ObjectId)
-  async checkTweetCache({ MongoUserId }) {
-    const X_TweetData = await this.model
-      .find({ X_MongoUserID: MongoUserId })
-      .sort({ created_at: -1 })
-      .limit(X_GetTweetLimit)
-      .lean();
-
-    //! ......................................................
-    //! If TweetData already exist in DataBase -> get it from DataBase
-
-    if (X_TweetData && X_TweetData.length) {
-      return {
-        data: X_TweetData,
-        meta: buildMetaFromTweets(X_TweetData),
-        source: "cache",
-      };
-    }
-  }
-
-  //! ......................................................
-  //! Reciving the Ids
-  //! ......................................................
-
   async getUserTweets({ xUserId, MongoUserId }) {
     //! ......................................................
     //! Console logs
@@ -51,16 +19,20 @@ module.exports = new (class X_Tweet extends BaseService {
     }
 
     //! ......................................................
-    //! Pass the MongoUserId(objectId) to checkTweetCache function
-    if (MongoUserId) {
-      const cacheResult = await this.checkTweetCache({ MongoUserId });
-      if (cacheResult) {
-        return cacheResult;
-      }
-    }
+    //! Check the DataBase
 
-    //! ......................................................
-    //! ......................................................
+    const cache = await this.model
+      .findOne({ X_MongoUserID: MongoUserId })
+      .lean();
+
+    //! Data already exist in DataBase --> get it from DataBase
+
+    if (cache) {
+      return {
+        source: "cache",
+        data: cache,
+      };
+    }
 
     try {
       //! ......................................................
@@ -71,7 +43,6 @@ module.exports = new (class X_Tweet extends BaseService {
       //! simplifying the data
 
       const apiTweets = tweetResponse?.apiTweets || [];
-      const apiMeta = tweetResponse?.apiMeta || null;
 
       //! ......................................................
       //! Console log
@@ -87,7 +58,6 @@ module.exports = new (class X_Tweet extends BaseService {
       if (!apiTweets.length) {
         return {
           data: [],
-          meta: apiMeta || buildMetaFromTweets([]),
           source: "x_api",
         };
       }
@@ -119,77 +89,25 @@ module.exports = new (class X_Tweet extends BaseService {
           };
 
           //! ......................................................
-          //! Check similar ids to avoid duplications
-
-          const existingTweet = await this.model.findOne({
-            X_TweetID: tweet.id,
-          });
+          //! Save the data in the DataBase
+          const createObject = await this.createObject(objectStructure);
 
           //! ......................................................
-          //! Update the data if Ids were similar
-
-          if (existingTweet) {
-            await this.model.updateOne(
-              { _id: existingTweet._id },
-              { $set: objectStructure },
-            );
-
-            //! ......................................................
-            //! Return the data
-
-            return this.model.findById(existingTweet._id);
-          }
-
-          //! ......................................................
-          //! ......................................................
-
-          try {
-            //! ......................................................
-            //! Save the data in the DataBase
-            const createObject = await this.createObject(objectStructure);
-            return createObject;
-
-            //! ......................................................
-            //! ......................................................
-          } catch (createErr) {
-            if (createErr?.code === 11000) {
-              return this.model.findOne({ X_TweetID: tweet.id });
-            }
-
-            //! ......................................................
-            //! ......................................................
-
-            throw createErr;
-          }
+          //! Return the data
+          return {
+            source: "x_api",
+            data: createObject,
+          };
         }),
       );
 
       //! ......................................................
-      //! ......................................................
-
-      return {
-        data: createdTweets.filter(Boolean),
-        meta: apiMeta || buildMetaFromTweets(createdTweets.filter(Boolean)),
-        source: "x_api",
-      };
-
-      //! ......................................................
-      //! ......................................................
+      //! catch
     } catch (err) {
       //! ......................................................
       //! ......................................................
 
       const status = err.response?.status;
-
-      //! ......................................................
-      //! ......................................................
-
-      if (MongoUserId) {
-        const cacheFallback = await this.checkTweetCache({ MongoUserId });
-        if (cacheFallback) {
-          return { ...cacheFallback, source: "cache_fallback" };
-        }
-      }
 
       //! ......................................................
       //! ......................................................
