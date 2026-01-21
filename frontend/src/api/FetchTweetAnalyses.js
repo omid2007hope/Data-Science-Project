@@ -1,12 +1,9 @@
 import axios from "axios";
 import { API_BASE_URL } from "./API_Base";
 
-async function API(data) {
+export async function fetchTweetAnalyses() {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/x/user/:username`, {
-      text: data,
-    });
-
+    const response = await axios.get(`${API_BASE_URL}/api/ai/tweet/analyses`);
     return response.data;
   } catch (error) {
     const message = error.response?.data || error.message;
@@ -14,5 +11,3 @@ async function API(data) {
     throw error;
   }
 }
-
-export default API;

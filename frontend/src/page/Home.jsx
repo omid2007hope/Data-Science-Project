@@ -1,4 +1,5 @@
-import API, { fetchTweetAnalyses } from "../api/index";
+import API from "../api/index";
+import { fetchTweetAnalyses } from "../api/FetchTweetAnalyses";
 
 import { useState } from "react";
 import {
@@ -44,8 +45,13 @@ function Home() {
     }
   };
 
+  //! ......................................................
+  //! ShowAll function
+
   const showAll = async () => {
     try {
+      //! ......................................................
+      //! fetch the data from Backend
       const data = await fetchTweetAnalyses();
       const mapped = (data || []).map((item) => ({
         id: item._id,
