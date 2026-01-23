@@ -32,7 +32,13 @@ import { Search } from "lucide-react";
 
 function Home() {
   const [search, setSearch] = useState("");
+
+  //! ......................................................
+  //! SummeryList useState()
   const [summeryList, setSummeryList] = useState([]);
+
+  //! ......................................................
+  //! Search function
 
   const searchSomething = () => {
     if (search) {
@@ -51,19 +57,34 @@ function Home() {
   const showAll = async () => {
     try {
       //! ......................................................
-      //! fetch the data from Backend
+      //! Get the data from API
+
       const data = await fetchTweetAnalyses();
+
+      //! ......................................................
+      //! Map the data
+
       const mapped = (data || []).map((item) => ({
         id: item._id,
         summery: item.oneSentence || item.text || "",
         date: item.createdAt || item.updatedAt || "",
       }));
+
+      //! ......................................................
+      //! Put the mapped data into SummryList useState()
+
       setSummeryList(mapped);
+
+      //! ......................................................
+      //! Catch any error
     } catch (error) {
       console.error("Show all failed:", error.message);
       alert("Failed to load summaries");
     }
   };
+
+  //! ......................................................
+  //! Date function
 
   const formatDate = (value) => {
     if (!value) return "Unknown";

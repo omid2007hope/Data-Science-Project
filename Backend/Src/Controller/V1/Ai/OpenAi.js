@@ -1,19 +1,34 @@
-const { sendDataToAi } = require("../../../Service/V1/Ai/OpenAi");
+//! ......................................................
+//! Importing
 
+const { sendDataToAi } = require("../../../Service/V1/Ai/OpenAi");
 const XTweetModel = require("../../../Model/X_Tweet");
 const XTweetAnalysisModel = require("../../../Model/X_TweetAnalysis");
 
+//! ......................................................
+//! AnalyzeTweet function
+
 async function analyzeTweet(req, res) {
   try {
-    const tweets = await XTweetModel.find({});
+    //! ......................................................
+    //! Get all saved Tweets from DataBase
 
+    const tweets = await XTweetModel.find({});
+    //! ......................................................
+    //! Simplify
     const tweetList = await Promise.all(
       tweets.map(async (tweet) => {
         return { text: tweet.text, id: tweet._id };
-      })
+      }),
     );
 
+    //! ......................................................
+    //! Send all Tweets to sendDataToAi function in OpenAi.js (Service)
+
     const data = await sendDataToAi(tweetList);
+
+    //! ......................................................
+    //! ......................................................
 
     const tweetById = new Map(
       tweets.map((tweet) => [String(tweet._id), tweet]),
@@ -49,13 +64,24 @@ async function analyzeTweet(req, res) {
   }
 }
 
+//! ......................................................
+//! Get all saved TweetAnalyses directly from DataBase function
+
 async function getAllTweetAnalyses(req, res) {
   try {
+    //! ......................................................
+    //! Search the DataBase for all TweetAnalyses
+
     const analyses = await XTweetAnalysisModel.find({})
       .sort({ createdAt: -1 })
       .lean();
 
+    //! ......................................................
+    //! Return all TweetAnalyses (Respond)
+
     return res.status(200).json(analyses);
+    //! ......................................................
+    //! Catch any error
   } catch (error) {
     console.error("Tweet Analysis Fetch Error | Controller", error.message);
     return res.status(500).json({

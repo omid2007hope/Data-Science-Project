@@ -1,8 +1,16 @@
+//! ......................................................
+//! Importing
 const openAi_API = require("../../../ThirdParty/APIs/Ai/OpenAi/OpenAi_API");
 const OpenAiTweetAnalysis = require("../../../Model/X_TweetAnalysis");
 const XTweet = require("../../../Model/X_Tweet");
 
+//! ......................................................
+//! OpenAi model
+
 const DEFAULT_MODEL = "gpt-4o-mini";
+
+//! ......................................................
+//! Main system prompt
 
 const SYSTEM_PROMPT = `
 You will receive one tweet or a list of tweets. Each tweet has:
@@ -25,6 +33,8 @@ Rules:
 
 function buildPayload({ text, model = DEFAULT_MODEL }) {
   // console.log(text);
+  //! ......................................................
+  //! Insert the Tweets + The system prompt + OpenAi default model
 
   return {
     model,
@@ -41,11 +51,25 @@ function buildPayload({ text, model = DEFAULT_MODEL }) {
   };
 }
 
+//! ......................................................
+//! Reciving all Tweets from OpenAi.js(Controller) and putting it in the payLoad
+
 async function sendDataToAi(text) {
+  //! ......................................................
+  //! Send the Tweets to buildPayLoad function
+
   const payload = buildPayload({
     text: text,
   });
-  console.log(payload);
+
+  //! ......................................................
+  //! Console log
+
+  // console.log(payload);
+
+  //! ......................................................
+  //! Post the Payload xmmmmmmm
+
   const { data } = await openAi_API.post("/responses", payload);
 
   const outputText = extractOpenAiText(data);
