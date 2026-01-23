@@ -9,12 +9,7 @@ import {
 } from "../../libraries/CSS_Main";
 
 function Header() {
-  const HeaderMenuOption = [
-    { id: 1, option: "Home" },
-    { id: 2, option: "Account" },
-    { id: 3, option: "About" },
-    { id: 4, option: "TOS" },
-  ];
+  const HeaderMenuOption = [{ id: 1, option: "Spectre" }];
 
   return (
     <>
