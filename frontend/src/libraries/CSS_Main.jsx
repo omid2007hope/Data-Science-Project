@@ -67,11 +67,11 @@ export const CSS_BORDER_FULL = "border rounded-lg";
 
 // ! colors
 
-export const CSS_COLOR_950 = "bg-slate-950 text-white/80 border-white/25";
+export const CSS_COLOR_950 = "bg-slate-950 text-white/80 border-white/75";
 
-export const CSS_COLOR_700 = "bg-slate-700 text-white/80 border-white/25";
+export const CSS_COLOR_700 = "bg-slate-700 text-white/80 border-white/75";
 
-export const CSS_COLOR_500 = "bg-slate-500 text-white/80 border-white/25";
+export const CSS_COLOR_500 = "bg-slate-500 text-white/80 border-white/75";
 
 export const CSS_COLOR_300 = "bg-slate-300 text-black/80 border-black/65";
 
@@ -83,9 +83,9 @@ export const CSS_COLOR_50 = "bg-slate-50 text-black/80 border-black/65";
 
 export const CSS_RESPONSIVE_TEXT_SIZE = "text-sm md:text-base lg:text-md";
 
-export const CSS_RESPONSIVE_BTN_SIZE = "p-1.5 md:p-1.5 lg:p-1.5";
+export const CSS_RESPONSIVE_BTN_SIZE = "p-1 md:p-1 lg:p-1";
 
-export const CSS_RESPONSIVE_INPUT_HEIGHT = "py-1.5 md:py-1.5 lg:py-1.5";
+export const CSS_RESPONSIVE_INPUT_HEIGHT = "py-1 md:py-1 lg:py-1";
 
 // ! animations
 
