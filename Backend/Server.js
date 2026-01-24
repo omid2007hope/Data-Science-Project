@@ -8,7 +8,7 @@ const connectDB = require("./Src/Data/DB");
 //! ......................................................
 //! Importing the scheduler
 
-const startScheduler = require("./Src/Service/V1/Jobs/X_RequestAutomation");
+const requestAutomation = require("./Src/Service/V1/Jobs/X_RequestAutomation");
 
 //! ......................................................
 //! Prevent cors error
@@ -37,7 +37,7 @@ connectDB().then(() => {
   //! ......................................................
   //! call and start the scheduler
 
-  startScheduler();
+  requestAutomation.RequestAutomation();
 
   //! ......................................................
   //! start the server
