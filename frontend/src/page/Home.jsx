@@ -119,7 +119,7 @@ function Home() {
             ></div>
           </div>
           <div
-            className={`justify-center w-full h-94/100 pt-2 ${CSS_flexCol_start} ${CSS_COLOR_500}`}
+            className={`justify-center w-full h-screen pt-2 ${CSS_flexCol_start} ${CSS_COLOR_500}`}
           >
             {summeryList.map((item) => {
               return (
@@ -149,7 +149,7 @@ function Home() {
             className={`w-full h-6/100 ${CSS_COLOR_950} ${CSS_flexRow_center}`}
           >
             <button
-              className={`py-1 px-2 ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE} ${CSS_COLOR_950} ${CSS_BORDER_Y_LEFT}`}
+              className={`hidden md:flex ${CSS_RESPONSIVE_BTN_SIZE} ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE} ${CSS_COLOR_950} ${CSS_BORDER_Y_LEFT}`}
               onClick={() => showAll()}
             >
               All
@@ -157,14 +157,14 @@ function Home() {
             <input
               type="text"
               value={search}
-              className={`pl-2.5 w-25 md:w-82 lg:w-60 ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_COLOR_50}`}
+              className={`hidden md:block pl-2.5 w-4 md:w-20 lg:w-60 ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_COLOR_50}`}
               onChange={(e) => setSearch(e.target.value.trim())}
               onKeyDown={(e) => {
                 if (e.key === "Enter") searchSomething();
               }}
             />
             <button
-              className={`${CSS_RESPONSIVE_BTN_SIZE} ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_COLOR_950} ${CSS_BORDER_Y_RIGHT} ${CSS_flexCol_center} ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE}`}
+              className={`hidden md:flex ${CSS_RESPONSIVE_BTN_SIZE} ${CSS_RESPONSIVE_INPUT_HEIGHT} ${CSS_COLOR_950} ${CSS_BORDER_Y_RIGHT} ${CSS_flexCol_center} ${CSS_TEXT_HOVER_ACTIVE_COLOR_BASE}`}
               onClick={() => searchSomething()}
             >
               <Search />
