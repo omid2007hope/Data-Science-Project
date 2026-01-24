@@ -10,6 +10,7 @@
     "google-trends-api": "^4.9.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.2",
+    "node-cron": "^3.0.3",
     "nodemon": "^3.1.11",
     "start": "^5.1.0"
   }
