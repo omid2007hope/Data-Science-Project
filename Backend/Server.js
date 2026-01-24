@@ -6,6 +6,11 @@ const router = require("./Src/Router");
 const connectDB = require("./Src/Data/DB");
 
 //! ......................................................
+//! Importing the scheduler
+
+const startScheduler = require("./Src/Service/V1/Jobs/X_RequestAutomation");
+
+//! ......................................................
 //! Prevent cors error
 
 app.use(
@@ -26,10 +31,21 @@ app.use(express.urlencoded({ extended: true })); // enables req.body for form su
 app.use("/api", router);
 
 //! ......................................................
-//! Start the server
+//! connecting to the database
 
 connectDB().then(() => {
+  //! ......................................................
+  //! call and start the scheduler
+
+  startScheduler();
+
+  //! ......................................................
+  //! start the server
+
   app.listen(3000, () => {
+    //! ......................................................
+    //! log and verify the server status
+
     console.log("Server running on http://localhost:3000");
   });
 });
